@@ -5,6 +5,11 @@ using UnityEngine;
 public class PlayerController_FSM : MonoBehaviour
 {
     #region Player Variables
+    private PlayerBaseState currentState;
+    public PlayerBaseState CurrentState { get { return currentState;  }  }
+    public readonly PlayerIdleState IdleState = new PlayerIdleState();
+    public readonly PlayerJumpingState JumpingState = new PlayerJumpingState();
+    public readonly PlayerDuckingState DuckingState = new PlayerDuckingState();
 
     public float jumpForce;
     public Transform head;
@@ -18,6 +23,7 @@ public class PlayerController_FSM : MonoBehaviour
 
     private SpriteRenderer face;
     private Rigidbody rbody;
+    public Rigidbody Rigidbody { get { return rbody; } }
 
     #endregion
 
@@ -28,10 +34,26 @@ public class PlayerController_FSM : MonoBehaviour
         SetExpression(idleSprite);
     }
 
+    private void Start()
+    {
+        TransitionToState(IdleState);
+    }
+
     // Update is called once per frame
     void Update()
     {
+        currentState.Update(this);
+    }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        currentState.OnCollitionEnter(this);
+    }
+
+    public void TransitionToState(PlayerBaseState state)
+    {
+        currentState = state;
+        currentState.EnterState(this);
     }
 
     public void SetExpression(Sprite newExpression)

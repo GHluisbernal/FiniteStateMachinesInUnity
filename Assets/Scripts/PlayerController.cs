@@ -40,9 +40,9 @@ public class PlayerController : MonoBehaviour
         {
             if (!isJumping)
             {
+                isJumping = true;
                 SetExpression(jumpingSprite);
                 rbody.AddForce(Vector3.up * jumpForce);
-                isJumping = true;
             }
         }
         else if (Input.GetButtonDown("Duck"))
