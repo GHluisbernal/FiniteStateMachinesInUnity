@@ -19,6 +19,11 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer face;
     private Rigidbody rbody;
 
+    private float rotation;
+    private bool isJumping;
+    private bool isDucking;
+    private bool isSpinning;
+
     #endregion
 
     private void Awake()
@@ -31,7 +36,73 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-       
+        if (Input.GetButtonDown("Jump"))
+        {
+            if (!isJumping)
+            {
+                SetExpression(jumpingSprite);
+                rbody.AddForce(Vector3.up * jumpForce);
+                isJumping = true;
+            }
+        }
+        else if (Input.GetButtonDown("Duck"))
+        {
+            if (!isJumping)
+            {
+                isDucking = true;
+                head.localPosition = new Vector3(head.localPosition.x, .5f, head.localPosition.z);
+                SetExpression(duckingSprite);
+            } else
+            {
+                isSpinning = true;
+                SetExpression(spinningSprite);
+            }
+        }
+        else if (Input.GetButtonUp("Duck"))
+        {
+            if (!isJumping)
+            {
+                isDucking = false;
+                head.localPosition = new Vector3(head.localPosition.x, .8f, head.localPosition.z);
+                SetExpression(idleSprite);
+            }
+        }
+        else if (Input.GetButtonUp("SwapWeapon"))
+        {
+            if (!isJumping && !isDucking && !isSpinning)
+            {
+                var usingWeapon01 = weapon01.gameObject.activeInHierarchy;
+                weapon01.gameObject.SetActive(!usingWeapon01);
+                weapon02.gameObject.SetActive(usingWeapon01);
+            }
+        }
+        if (isSpinning)
+        {
+            Spin();
+        }
+    }
+
+    private void Spin()
+    {
+        var amountToRotate = 900 * Time.deltaTime;
+        rotation += amountToRotate;
+        if (rotation < 360)
+        {
+            transform.Rotate(Vector3.up, amountToRotate);
+        }
+        else
+        {
+            transform.rotation = Quaternion.identity;
+            isSpinning = false;
+            rotation = 0;
+            SetExpression(jumpingSprite);
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        isJumping = false;
+        SetExpression(idleSprite);
     }
 
     public void SetExpression(Sprite newExpression)
